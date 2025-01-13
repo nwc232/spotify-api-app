@@ -11,11 +11,12 @@ const RESPONSE_TYPE = 'token';
 const SpotifyAuth = () => {
   return (
     <div>
-      <h1>Spotify</h1>
+      <h1>Welcome!</h1>
+      <h2>Login to Spotify below to view your top songs</h2>
       <a
         href={`${AUTH_ENDPOINT}?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=user-top-read`}
       >
-        Login to Spotify
+        Login
         </a>
     </div>
   );

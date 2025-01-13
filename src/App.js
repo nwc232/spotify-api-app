@@ -6,7 +6,8 @@ import './App.css';
 const App = () => {
 
   const [token, setToken] = useState('');
-  const [topTracks, setTopTracks] = useState([]);
+  const [data, setData] = useState([]);
+  const [view, setView] = useState('tracks');
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -32,18 +33,29 @@ const App = () => {
 
   useEffect(() => {
     if (token) {
+      let endpoint = '';
+      switch (view) {
+        case 'tracks':
+          endpoint = 'https://api.spotify.com/v1/me/top/tracks';
+          break;
+        case 'artists':
+          endpoint = 'https://api.spotify.com/v1/me/top/artists';
+          break;
+        default:
+          endpoint = 'https://api.spotify.com/v1/me/top/tracks';
+      }
       axios
-        .get('https://api.spotify.com/v1/me/top/tracks', {
+        .get(endpoint, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
         .then((response) => {
-          setTopTracks(response.data.items);
+          setData(response.data.items);
         })
-        .catch((error) => console.error('Error fetching top tracks:', error));
+        .catch((error) => console.error('Error fetching data:', error));
     }
-  }, [token]);
+  }, [token, view]);
 
   return (
     <div className="App">
@@ -53,18 +65,40 @@ const App = () => {
       <div>
       <h1>Welcome to my Spotify App!</h1>
       <button onClick={logout}>Logout</button>
-      <h2>Your Top Tracks!</h2>
+
+      <div style={{ margin: '20px 0'}}>
+        <button onClick={() => setView('tracks')}>Top Songs</button>
+        <button onClick={() => setView('artists')}>Top Artists</button>
+      </div>
+      <h2>Your Top {view === 'tracks' ? 'Songs' : 'Artists'}!</h2>
       <ul>
-        {topTracks.map((track) => (
-          <li key={track.id}>
-            <img
-            src={track.album.images[0]?.url}
-            alt={track.name}
-            style={{width: '50px', height: '50px', marginRight: '10px'}}
-            />
-            {track.name} by {track.artists.map((artist) => artist.name).join(', ')}
-          </li>
-        ))}
+        {view === 'tracks' &&
+          data.map((track) => (
+            track.album?.images?.[0] ? (
+            <li key={track.id}>
+              <img
+                src={track.album.images[0]?.url || 'https://via.placeholder.com/100'}
+                alt={track.name}
+                style={{ width: '100px', height: '100px', marginRight: '10px' }}
+              />
+              {track.name} by {track.artists.map((artist) => artist.name).join(', ')}
+            </li>
+            ) : null
+          ))}
+        
+        {view === 'artists' &&
+          data.map((artist) => (
+            artist.images?.[0] ? (
+            <li key={artist.id}>
+              <img
+                src={artist.images?.[0]?.url || 'https://via.placeholder.com/100'}
+                alt={artist.name}
+                style={{ width: '100px', height: '100px', marginRight: '10px' }}
+              />
+              {artist.name}
+            </li>
+          ) : null
+          ))}
       </ul>
     </div>
     )}
